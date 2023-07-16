@@ -3,10 +3,10 @@ A rust library to encapsulate boilerplate code for handling environment variable
 
 ## sample usage
 ```
-use envutil::string::get_int;
+use envutil;
 
 fn add_1() {
-    let num: i64 = get_int("key"); // assume an environment "key" exists
+    let num: i64 = envutil::get_int("key"); // assume an environment "key" exists
     num + 1
 }
 ```
