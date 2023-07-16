@@ -1,0 +1,22 @@
+[package]
+name = "envutil"
+version = "0.0.1"
+repository = "https://github.com/bpmason1/envutil-rs"
+authors = ["Brian Mason <bpmason1@hotmail.com>"]
+license = "MIT"
+description = "A rust library to encapsulate boilerplate code for handling environment variables"
+readme = "README.md"
+keywords = ["environment", "env"]
+categories = ["development-tools"]
+edition = "2021"
+
+include = [
+  "src/**/*",
+  "Cargo.toml",
+  "README.md",
+  "LICENSE"
+]
+
+[dependencies]
+
+[dev-dependencies]
