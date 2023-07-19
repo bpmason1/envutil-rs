@@ -2,7 +2,7 @@ use std::env;
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-fn get_env(env_str: &str) -> Result<String, String> {
+pub fn get_env(env_str: &str) -> Result<String, String> {
     match env::var(env_str) {
         Ok(e) => Ok(e),
         Err(_) => {
