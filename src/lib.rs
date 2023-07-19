@@ -3,40 +3,46 @@ use std::env;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 fn get_env(env_str: &str) -> Result<String, String> {
-    return match env::var(env_str) {
+    match env::var(env_str) {
         Ok(e) => Ok(e),
         Err(_) => {
             let msg = format!("No such environment {e}", e=env_str);
             Err(msg.to_string())
         }
-    };
+    }
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+pub fn get_env_or_die(env_str: &str) -> String {
+    get_env(env_str).unwrap_or_else(
+        |_| {
+            panic!("Could not find required env: {key}", key=env_str)
+        }
+    )
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 pub fn has_env(env_str: &str) -> bool {
-    return match env::var(env_str) {
-        Ok(_) => true,
-        Err(_) => false
-    };
+    env::var(env_str).is_ok()
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 pub fn get_env_with_default(env_str: &str, default: &str) -> String {
-    return match get_env(env_str) {
-        Ok(e) => e,
-        Err(msg) => {
+    get_env(env_str).unwrap_or_else(
+        |msg| {
             println!("{m} ... using defaut {d}", m=msg, d=default);
             default.to_string()
         }
-    };
+    )
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 fn get_parsed<T: std::str::FromStr>(env_str: &str) -> Result<T, String> {
-    return match get_env(env_str) {
+    match get_env(env_str) {
         Err(m) => Err(m),
         Ok(s) => {
             match s.parse::<T>() {
@@ -50,25 +56,24 @@ fn get_parsed<T: std::str::FromStr>(env_str: &str) -> Result<T, String> {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 pub fn get_int(env_str: &str) -> Result<i64, String> {
-    return get_parsed::<i64>(env_str);
+    get_parsed::<i64>(env_str)
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 pub fn get_int_with_default(env_str: &str, default: i64) -> i64 {
-    return match get_int(env_str) {
-        Ok(i) => i,
-        Err(msg) => {
+    get_int(env_str).unwrap_or_else(
+        |msg| {
             println!("{m} ... using defaut {d}", m=msg, d=default);
             default
         }
-    }
+    )
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 pub fn get_int_in_range(env_str: &str, min: i64, max: i64) -> Result<i64, String> {
-    return match get_int(env_str) {
+    match get_int(env_str) {
         Err(m) => Err(m),
         Ok(i) => {
             if min <= i && i <= max {
@@ -78,13 +83,13 @@ pub fn get_int_in_range(env_str: &str, min: i64, max: i64) -> Result<i64, String
                 return Err(msg)
             }
         }
-    };
+    }
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 pub fn get_port(env_str: &str) -> Result<u16, String> {
-    return match get_parsed::<u16>(env_str) {
+    match get_parsed::<u16>(env_str) {
         Ok(port) => Ok(port),
         Err(_) => {
             match self::has_env(env_str) {
@@ -92,16 +97,23 @@ pub fn get_port(env_str: &str) -> Result<u16, String> {
                 false => Err(format!("invalid port: UNKNOWN"))
             }
         }
-    };
+    }
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 pub fn get_port_with_default(env_str: &str, default: u16) -> u16 {
-    return match get_port(env_str) {
-        Ok(i) => i,
-        Err(_) => default
-    };
+    get_port(env_str).unwrap_or(default)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+pub fn get_port_or_die(env_str: &str) -> u16 {
+    get_port(env_str).unwrap_or_else(
+        |_| {
+            panic!("Invalid or missing port for: {key}", key=env_str)
+        }
+    )
 }
 
 
@@ -138,6 +150,20 @@ pub fn test_get_env_with_default() {
     env::set_var(key, "bar");
     let result2: String = self::get_env_with_default(key, "abc123");
     assert_eq!(result2, "bar");
+}
+
+#[test]
+pub fn test_get_env_or_die() {
+    let key1 = "test_key::test_get_env_or_die::1";
+    env::set_var(key1, "foo");
+    assert_eq!(get_env_or_die(key1), "foo");
+
+    let key2 = "test_key::test_get_env_or_die::2";
+    env::remove_var(key2);
+    let result2 = std::panic::catch_unwind(
+        || get_env_or_die(key2)
+     );
+     assert!(result2.is_err());
 }
 
 #[test]

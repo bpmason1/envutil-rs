@@ -1,6 +1,6 @@
 [package]
 name = "envutil"
-version = "0.0.2"
+version = "0.0.3"
 repository = "https://github.com/bpmason1/envutil-rs"
 authors = ["Brian Mason <bpmason1@hotmail.com>"]
 license = "MIT"
